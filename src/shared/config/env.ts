@@ -23,14 +23,25 @@ const envSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
 });
 
-function loadEnv() {
+function loadEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
-  if (!parsed.success) {
-    // Do not print values — only which keys failed (no secret leakage).
-    const issues = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
-    throw new Error(`Invalid environment variables: ${issues}`);
+  if (parsed.success) return parsed.data;
+
+  // During `next build`, route modules are imported for analysis before any
+  // real environment exists. Use placeholders so module evaluation succeeds;
+  // strict validation still runs at server runtime (a fresh process).
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return {
+      NODE_ENV: "production",
+      DATABASE_URL: "postgresql://build:build@localhost:5432/build",
+      BETTER_AUTH_SECRET: "build-time-placeholder-secret-not-a-real-key",
+      BETTER_AUTH_URL: "http://localhost:3000",
+    };
   }
-  return parsed.data;
+
+  // Do not print values — only which keys failed (no secret leakage).
+  const issues = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
+  throw new Error(`Invalid environment variables: ${issues}`);
 }
 
 export const env = loadEnv();

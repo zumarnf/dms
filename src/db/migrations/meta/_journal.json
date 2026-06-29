@@ -8,6 +8,13 @@
       "when": 1782724900552,
       "tag": "0000_nostalgic_thing",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782726542015,
+      "tag": "0001_regular_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

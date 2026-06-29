@@ -3,6 +3,7 @@
 // Relative imports are used so drizzle-kit (which does not resolve tsconfig path
 // aliases) can bundle this graph.
 export * from "../../entities/user/schema";
+export * from "../../entities/auth/schema";
 export * from "../../entities/folder/schema";
 export * from "../../entities/document/schema";
 export * from "../../entities/version/schema";

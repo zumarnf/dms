@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/shared/lib/db";
 import { storage } from "@/shared/lib/storage-server";
 import { requireCan } from "@/processes/auth/guard";
+import { authorizeFolder } from "@/processes/auth/authorizeFolder";
 import { auditRepository } from "@/entities/audit/repository";
 import { toAppError } from "@/shared/lib/errors";
 import { createDocumentFromUpload } from "./service";
@@ -16,18 +17,24 @@ export async function uploadDocumentsAction(formData: FormData): Promise<UploadR
   const user = await requireCan("document:create");
 
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  const folderIdRaw = String(formData.get("folderId") ?? "");
+  const folderId = folderIdRaw.length > 0 ? folderIdRaw : undefined;
 
   if (files.length === 0) return { ok: false, error: "Tidak ada file yang dipilih" };
 
   try {
+    // When targeting a folder, ensure the user may write to it.
+    if (folderId) await authorizeFolder(db, user, folderId, "folder:update");
+
     let count = 0;
     for (const file of files) {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const doc = await createDocumentFromUpload({ db, storage }, user.id, {
-        name: file.name,
-        mimeType: file.type,
-        bytes,
-      });
+      const doc = await createDocumentFromUpload(
+        { db, storage },
+        user.id,
+        { name: file.name, mimeType: file.type, bytes },
+        { folderId },
+      );
       await auditRepository(db).log({
         actorId: user.id,
         action: "document.upload",

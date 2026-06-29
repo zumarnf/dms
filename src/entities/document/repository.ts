@@ -72,6 +72,33 @@ export function documentRepository(db: Db) {
         .limit(limit);
     },
 
+    /** List accessible, non-deleted documents inside a folder. */
+    async listByFolder(
+      user: SessionUser,
+      folderId: string,
+      pagination: Pagination,
+    ): Promise<Document[]> {
+      const { offset, limit } = toOffsetLimit(pagination);
+      const visibility = isPrivileged(user)
+        ? undefined
+        : or(eq(documents.ownerId, user.id), inArray(documents.id, sharedDocumentIds(db, user)));
+      return db
+        .select()
+        .from(documents)
+        .where(and(isNull(documents.deletedAt), eq(documents.folderId, folderId), visibility))
+        .orderBy(desc(documents.createdAt))
+        .offset(offset)
+        .limit(limit);
+    },
+
+    /** Move a document into a folder (or to the root when null). */
+    async setFolder(id: string, folderId: string | null): Promise<void> {
+      await db
+        .update(documents)
+        .set({ folderId, updatedAt: new Date() })
+        .where(eq(documents.id, id));
+    },
+
     /**
      * Full-text search over accessible documents. Falls back to a plain list
      * when the query has no searchable terms. Always scoped to the user.

@@ -7,7 +7,7 @@ import { uploadDocumentsAction, type UploadResult } from "../api/action";
 
 const initialState: UploadResult | null = null;
 
-export function UploadForm() {
+export function UploadForm({ folderId }: { folderId?: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(
     async (_prev: UploadResult | null, formData: FormData) => {
@@ -20,6 +20,7 @@ export function UploadForm() {
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-wrap items-center gap-3">
+      {folderId && <input type="hidden" name="folderId" value={folderId} />}
       <input
         type="file"
         name="files"

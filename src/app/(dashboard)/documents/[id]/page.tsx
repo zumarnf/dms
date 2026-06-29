@@ -9,6 +9,8 @@ import { versionRepository } from "@/entities/version/repository";
 import { permissionRepository } from "@/entities/permission/repository";
 import { commentRepository } from "@/entities/comment/repository";
 import { userRepository } from "@/entities/user/repository";
+import { folderRepository } from "@/entities/folder/repository";
+import { MoveDocumentForm } from "@/features/folder-manage/ui/MoveDocumentForm";
 import { Badge } from "@/shared/ui/atoms";
 import { ShareForm } from "@/features/document-share/ui/ShareForm";
 import { RevokeShareButton } from "@/features/document-share/ui/RevokeShareButton";
@@ -64,6 +66,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       )
     : [];
   const levelLabel: Record<string, string> = { view: "Lihat", edit: "Edit", manage: "Kelola" };
+  const folders = canEdit ? await folderRepository(db).listAll(user) : [];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -85,6 +88,16 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       </div>
 
       {doc.description && <p className="text-muted-foreground mt-3 text-sm">{doc.description}</p>}
+
+      {canEdit && (
+        <div className="mt-4">
+          <MoveDocumentForm
+            documentId={id}
+            folders={folders.map((f) => ({ id: f.id, name: f.name }))}
+            currentFolderId={doc.folderId}
+          />
+        </div>
+      )}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Versi</h2>

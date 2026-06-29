@@ -1,4 +1,12 @@
-import { LayoutDashboard, FileText, Trash2, Activity, Users, type LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Folder,
+  Trash2,
+  Activity,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import type { Role } from "@/shared/config/permissions";
 
 export type NavItem = {
@@ -12,6 +20,7 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/documents", label: "Dokumen", icon: FileText },
+  { href: "/folders", label: "Folder", icon: Folder },
   { href: "/trash", label: "Sampah", icon: Trash2 },
   { href: "/activity", label: "Aktivitas", icon: Activity, roles: ["admin", "manager"] },
   { href: "/admin/users", label: "Pengguna", icon: Users, roles: ["admin"] },

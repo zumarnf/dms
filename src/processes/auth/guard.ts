@@ -23,6 +23,16 @@ export async function requireUser(): Promise<SessionUser> {
   return user;
 }
 
+export type SessionProfile = SessionUser & { name: string; email: string };
+
+/** Require a session and return display info (name/email) for the shell. */
+export async function requireProfile(): Promise<SessionProfile> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) redirect("/login");
+  const u = session.user as { id: string; name: string; email: string; role?: Role };
+  return { id: u.id, name: u.name, email: u.email, role: u.role ?? "viewer" };
+}
+
 /** Require a session AND a capability; throws ForbiddenError when not permitted. */
 export async function requireCan(action: Action): Promise<SessionUser> {
   const user = await requireUser();

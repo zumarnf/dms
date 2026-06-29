@@ -104,6 +104,18 @@ export function documentRepository(db: Db) {
         .limit(limit);
     },
 
+    /** Count non-deleted documents the user can access (for the dashboard). */
+    async countAccessible(user: SessionUser): Promise<number> {
+      const visibility = isPrivileged(user)
+        ? undefined
+        : or(eq(documents.ownerId, user.id), inArray(documents.id, sharedDocumentIds(db, user)));
+      const [row] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(documents)
+        .where(and(isNull(documents.deletedAt), visibility));
+      return row?.count ?? 0;
+    },
+
     /** Fetch a document by id ignoring soft-delete and scoping (internal use). */
     async getById(id: string): Promise<Document | undefined> {
       const [row] = await db.select().from(documents).where(eq(documents.id, id)).limit(1);

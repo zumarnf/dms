@@ -9,6 +9,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./tests/setup.ts"],
     passWithNoTests: true,
+    // PGlite (WASM Postgres) spins up per integration-test file; give migrations room.
+    hookTimeout: 30000,
+    testTimeout: 20000,
     include: ["tests/**/*.{test,spec}.{ts,tsx}", "src/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["tests/e2e/**", "node_modules/**"],
   },

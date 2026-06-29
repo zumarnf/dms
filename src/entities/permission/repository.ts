@@ -55,6 +55,15 @@ export function permissionRepository(db: Db) {
         );
     },
 
+    async getById(id: string): Promise<Permission | undefined> {
+      const [row] = await db.select().from(permissions).where(eq(permissions.id, id)).limit(1);
+      return row;
+    },
+
+    async deleteById(id: string): Promise<void> {
+      await db.delete(permissions).where(eq(permissions.id, id));
+    },
+
     async listForResource(resourceType: ResourceType, resourceId: string): Promise<Permission[]> {
       return db
         .select()

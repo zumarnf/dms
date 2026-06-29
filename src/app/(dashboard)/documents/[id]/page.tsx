@@ -8,7 +8,10 @@ import { documentRepository } from "@/entities/document/repository";
 import { versionRepository } from "@/entities/version/repository";
 import { permissionRepository } from "@/entities/permission/repository";
 import { commentRepository } from "@/entities/comment/repository";
+import { userRepository } from "@/entities/user/repository";
 import { Badge } from "@/shared/ui/atoms";
+import { ShareForm } from "@/features/document-share/ui/ShareForm";
+import { RevokeShareButton } from "@/features/document-share/ui/RevokeShareButton";
 import { AddVersionForm } from "@/features/document-versioning/ui/AddVersionForm";
 import { setCurrentVersionAction } from "@/features/document-versioning/api/action";
 import { CommentForm } from "@/features/document-comment/ui/CommentForm";
@@ -41,11 +44,26 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
   const ctx = { ownerId: doc.ownerId, shareLevel: level ?? undefined };
   const canEdit = can(user, "document:update", ctx);
   const canDelete = can(user, "document:delete", ctx);
+  const canShare = can(user, "document:share", ctx);
 
   const [versions, comments] = await Promise.all([
     versionRepository(db).listByDocument(id),
     commentRepository(db).listWithAuthor(id),
   ]);
+
+  // Resolve share grants with display labels (only when the viewer may manage sharing).
+  const grants = canShare
+    ? await Promise.all(
+        (await permissionRepository(db).listForResource("document", id)).map(async (g) => {
+          const label =
+            g.granteeType === "user"
+              ? ((await userRepository(db).findById(g.granteeId))?.email ?? g.granteeId)
+              : `Peran: ${g.granteeId}`;
+          return { id: g.id, label, level: g.level };
+        }),
+      )
+    : [];
+  const levelLabel: Record<string, string> = { view: "Lihat", edit: "Edit", manage: "Kelola" };
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -104,6 +122,30 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           </div>
         )}
       </section>
+
+      {canShare && (
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold">Berbagi</h2>
+          {grants.length > 0 && (
+            <ul className="border-border mt-3 divide-y rounded-xl border">
+              {grants.map((g) => (
+                <li
+                  key={g.id}
+                  className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                >
+                  <span>
+                    {g.label} <Badge variant="outline">{levelLabel[g.level]}</Badge>
+                  </span>
+                  <RevokeShareButton permissionId={g.id} />
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-4">
+            <ShareForm documentId={id} />
+          </div>
+        </section>
+      )}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Komentar</h2>

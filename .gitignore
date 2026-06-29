@@ -44,6 +44,9 @@ yarn-error.log*
 # Drizzle
 /drizzle/.cache
 
+# Uploaded files (local storage driver)
+/storage/
+
 # Local agent tooling & planning docs (not part of app repo)
 /.claude/
 /plans/

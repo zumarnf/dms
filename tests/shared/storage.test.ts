@@ -43,9 +43,9 @@ describe("filename + key", () => {
     expect(sanitizeFilename("réport final!.pdf")).toBe("r_port_final_.pdf");
   });
 
-  it("builds a deterministic storage key", () => {
-    expect(buildStorageKey("doc-1", 2, "Invoice 2026.pdf")).toBe(
-      "documents/doc-1/v2/Invoice_2026.pdf",
+  it("builds a deterministic storage key from a version token", () => {
+    expect(buildStorageKey("doc-1", "tok-abc", "Invoice 2026.pdf")).toBe(
+      "documents/doc-1/tok-abc/Invoice_2026.pdf",
     );
   });
 });

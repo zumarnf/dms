@@ -104,6 +104,25 @@ export function documentRepository(db: Db) {
         .limit(limit);
     },
 
+    /** Fetch a document by id ignoring soft-delete and scoping (internal use). */
+    async getById(id: string): Promise<Document | undefined> {
+      const [row] = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+      return row;
+    },
+
+    /** List soft-deleted documents the user owns (or all, for privileged roles). */
+    async listTrashed(user: SessionUser, pagination: Pagination): Promise<Document[]> {
+      const { offset, limit } = toOffsetLimit(pagination);
+      const ownership = isPrivileged(user) ? undefined : eq(documents.ownerId, user.id);
+      return db
+        .select()
+        .from(documents)
+        .where(and(sql`${documents.deletedAt} is not null`, ownership))
+        .orderBy(desc(documents.deletedAt))
+        .offset(offset)
+        .limit(limit);
+    },
+
     async softDelete(id: string): Promise<void> {
       await db.update(documents).set({ deletedAt: new Date() }).where(eq(documents.id, id));
     },

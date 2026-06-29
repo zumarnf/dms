@@ -43,11 +43,14 @@ export function sanitizeFilename(name: string): string {
   return base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 200) || "file";
 }
 
-/** Deterministic, collision-safe object key for a document version. */
+/**
+ * Collision-safe object key for a document version. `versionToken` is a unique
+ * id (e.g. a UUID) generated per version so the key never depends on ordering.
+ */
 export function buildStorageKey(
   documentId: string,
-  versionNo: number,
+  versionToken: string,
   originalName: string,
 ): string {
-  return `documents/${documentId}/v${versionNo}/${sanitizeFilename(originalName)}`;
+  return `documents/${documentId}/${versionToken}/${sanitizeFilename(originalName)}`;
 }

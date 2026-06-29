@@ -1,20 +1,20 @@
-import type { Db } from "@/shared/lib/db-types";
-import type { StorageDriver } from "@/shared/lib/storage-driver";
-import { assertValidUpload, buildStorageKey } from "@/shared/lib/storage";
 import { toAppError } from "@/shared/lib/errors";
+import { assertValidUpload } from "@/shared/lib/storage";
 import { documentRepository } from "@/entities/document/repository";
-import { versionRepository } from "@/entities/version/repository";
 import type { Document } from "@/entities/document/schema";
-import { extractText } from "./extract";
+import {
+  addVersion,
+  type VersionDeps,
+  type UploadFile,
+} from "@/features/document-versioning/api/service";
 
-export type UploadDeps = { db: Db; storage: StorageDriver };
-export type UploadFile = { name: string; mimeType: string; bytes: Uint8Array };
+export type UploadDeps = VersionDeps;
 export type UploadOptions = { folderId?: string; description?: string; category?: string };
 
 /**
- * Create a document with its first version and persist the file.
- * Steps are ordered so a storage failure rolls back the document record,
- * preventing orphan rows (FR-3.6). Dependencies are injected for testability.
+ * Create a document with its first version. Ordering ensures a storage failure
+ * rolls back the document record (no orphan rows — FR-3.6). Deps are injected
+ * for testability.
  */
 export async function createDocumentFromUpload(
   deps: UploadDeps,
@@ -22,11 +22,10 @@ export async function createDocumentFromUpload(
   file: UploadFile,
   opts: UploadOptions = {},
 ): Promise<Document> {
+  // Validate before creating any record so a bad file never makes a row.
   assertValidUpload({ name: file.name, mimeType: file.mimeType, size: file.bytes.length });
 
   const docs = documentRepository(deps.db);
-  const versions = versionRepository(deps.db);
-  const extracted = extractText(file.mimeType, file.bytes);
 
   const doc = await docs.create({
     title: file.name,
@@ -37,17 +36,7 @@ export async function createDocumentFromUpload(
   });
 
   try {
-    const key = buildStorageKey(doc.id, 1, file.name);
-    await deps.storage.put(key, file.bytes);
-    await versions.createNextVersion(doc.id, {
-      storageKey: key,
-      mimeType: file.mimeType,
-      sizeBytes: file.bytes.length,
-      uploadedBy: ownerId,
-      extractedText: extracted,
-    });
-    const searchText = [file.name, opts.description, extracted].filter(Boolean).join(" ");
-    await docs.setSearchText(doc.id, searchText);
+    await addVersion(deps, doc, ownerId, file);
     return doc;
   } catch (err) {
     // Roll back the orphaned document record (best effort).
@@ -55,3 +44,5 @@ export async function createDocumentFromUpload(
     throw toAppError(err);
   }
 }
+
+export type { UploadFile };

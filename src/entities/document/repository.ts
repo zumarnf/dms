@@ -1,8 +1,9 @@
-import { and, desc, eq, isNull, or, inArray } from "drizzle-orm";
+import { and, desc, eq, isNull, or, inArray, sql } from "drizzle-orm";
 import type { Db } from "@/shared/lib/db-types";
 import type { SessionUser } from "@/shared/lib/rbac";
 import { ForbiddenError, NotFoundError } from "@/shared/lib/errors";
 import { toOffsetLimit, type Pagination } from "@/shared/types";
+import { toPrefixTsQuery } from "@/shared/lib/fts";
 import { documents, type Document, type NewDocument } from "./schema";
 import { permissions } from "@/entities/permission/schema";
 
@@ -71,12 +72,60 @@ export function documentRepository(db: Db) {
         .limit(limit);
     },
 
+    /**
+     * Full-text search over accessible documents. Falls back to a plain list
+     * when the query has no searchable terms. Always scoped to the user.
+     */
+    async searchAccessible(
+      user: SessionUser,
+      pagination: Pagination,
+      query: string,
+    ): Promise<Document[]> {
+      const tsq = toPrefixTsQuery(query);
+      if (!tsq) return this.listAccessible(user, pagination);
+
+      const { offset, limit } = toOffsetLimit(pagination);
+      const visibility = isPrivileged(user)
+        ? undefined
+        : or(eq(documents.ownerId, user.id), inArray(documents.id, sharedDocumentIds(db, user)));
+
+      return db
+        .select()
+        .from(documents)
+        .where(
+          and(
+            isNull(documents.deletedAt),
+            sql`${documents.searchTsv} @@ to_tsquery('simple', ${tsq})`,
+            visibility,
+          ),
+        )
+        .orderBy(desc(documents.createdAt))
+        .offset(offset)
+        .limit(limit);
+    },
+
     async softDelete(id: string): Promise<void> {
       await db.update(documents).set({ deletedAt: new Date() }).where(eq(documents.id, id));
     },
 
     async restore(id: string): Promise<void> {
       await db.update(documents).set({ deletedAt: null }).where(eq(documents.id, id));
+    },
+
+    /** Permanently remove a document (used for upload cleanup and purge). */
+    async hardDelete(id: string): Promise<void> {
+      await db.delete(documents).where(eq(documents.id, id));
+    },
+
+    /**
+     * Rebuild the full-text search vector from the given text. Uses the
+     * 'simple' config (no language-specific stemming) — safe for mixed ID/EN.
+     */
+    async setSearchText(id: string, text: string): Promise<void> {
+      await db
+        .update(documents)
+        .set({ searchTsv: sql`to_tsvector('simple', ${text})` })
+        .where(eq(documents.id, id));
     },
   };
 }

@@ -1,6 +1,9 @@
 import { defineConfig } from "drizzle-kit";
+import { loadEnvConfig } from "@next/env";
 
-// DATABASE_URL is read directly here (drizzle-kit runs outside Next's server runtime).
+// drizzle-kit runs outside Next's runtime, so load .env.local the same way Next does.
+loadEnvConfig(process.cwd());
+
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required for drizzle-kit");

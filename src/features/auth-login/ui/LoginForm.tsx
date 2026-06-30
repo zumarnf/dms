@@ -102,7 +102,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium transition-colors hover:opacity-90 disabled:opacity-60"
+        className="bg-primary text-primary-foreground elevate mt-1 inline-flex h-11 items-center justify-center rounded-xl px-4 font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isSubmitting ? "Memproses…" : mode === "login" ? "Masuk" : "Daftar"}
       </button>

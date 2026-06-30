@@ -22,11 +22,11 @@ export default async function ActivityPage() {
       <h1 className="text-2xl font-semibold">Aktivitas</h1>
       <p className="text-muted-foreground mt-1 text-sm">Jejak audit aksi pada sistem.</p>
 
-      <div className="border-border mt-5 overflow-hidden rounded-xl border">
+      <div className="border-border mt-5 overflow-x-auto rounded-2xl border">
         {entries.length === 0 ? (
           <p className="text-muted-foreground p-12 text-center text-sm">Belum ada aktivitas.</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-136 text-sm">
             <thead className="bg-secondary/50 text-muted-foreground text-left">
               <tr>
                 <th className="px-4 py-2.5 font-medium">Aksi</th>

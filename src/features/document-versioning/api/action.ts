@@ -7,6 +7,7 @@ import { requireUser } from "@/processes/auth/guard";
 import { authorizeDocument } from "@/processes/auth/authorizeDocument";
 import { auditRepository } from "@/entities/audit/repository";
 import { versionRepository } from "@/entities/version/repository";
+import { documentRepository } from "@/entities/document/repository";
 import { toAppError } from "@/shared/lib/errors";
 import { addVersion } from "./service";
 
@@ -49,6 +50,11 @@ export async function setCurrentVersionAction(formData: FormData): Promise<void>
   const versionId = String(formData.get("versionId") ?? "");
 
   await authorizeDocument(db, user, documentId, "document:update");
-  await versionRepository(db).setCurrent(documentId, versionId);
+  // setCurrent also syncs the document title to the chosen version's filename.
+  const version = await versionRepository(db).setCurrent(documentId, versionId);
+  await documentRepository(db).setSearchText(
+    documentId,
+    [version.fileName, version.extractedText].filter(Boolean).join(" "),
+  );
   revalidatePath(`/documents/${documentId}`);
 }

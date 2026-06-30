@@ -46,24 +46,40 @@ export default async function FolderPage({ params }: { params: Promise<{ id: str
       </nav>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">{folder.name}</h1>
+        <h1 className="flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
+          <span className="bg-primary/12 text-primary grid h-9 w-9 shrink-0 place-items-center rounded-xl">
+            <FolderIcon className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 truncate">{folder.name}</span>
+        </h1>
         <DeleteFolderButton folderId={id} />
       </div>
 
-      <div className="mt-5 flex flex-col gap-3">
+      <div className="mt-5 grid gap-4">
+        <section
+          className="bg-card border-border rounded-2xl border p-5"
+          aria-label="Unggah dokumen"
+        >
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <FileText className="text-primary h-4 w-4" />
+            Unggah ke folder ini
+          </h2>
+          <UploadForm folderId={id} />
+        </section>
         <CreateFolderForm parentId={id} />
-        <UploadForm folderId={id} />
       </div>
 
       {subfolders.length > 0 && (
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {subfolders.map((f) => (
             <li key={f.id}>
               <Link
                 href={`/folders/${f.id}`}
-                className="bg-card border-border hover:border-primary/50 flex items-center gap-3 rounded-xl border p-4 transition-colors"
+                className="bg-card border-border hover-lift group flex items-center gap-3 rounded-2xl border p-4"
               >
-                <FolderIcon className="text-primary h-5 w-5" />
+                <span className="bg-primary/12 text-primary grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-105">
+                  <FolderIcon className="h-5 w-5" />
+                </span>
                 <span className="truncate font-medium">{f.name}</span>
               </Link>
             </li>
@@ -71,11 +87,14 @@ export default async function FolderPage({ params }: { params: Promise<{ id: str
         </ul>
       )}
 
-      <div className="border-border mt-6 overflow-hidden rounded-xl border">
+      <div className="border-border mt-6 overflow-x-auto rounded-2xl border">
         {docs.length === 0 ? (
-          <p className="text-muted-foreground p-8 text-center text-sm">
-            Belum ada dokumen di folder ini.
-          </p>
+          <div className="flex flex-col items-center gap-2 p-10 text-center">
+            <span className="bg-secondary text-muted-foreground grid h-11 w-11 place-items-center rounded-2xl">
+              <FileText className="h-5 w-5" />
+            </span>
+            <p className="text-muted-foreground text-sm">Belum ada dokumen di folder ini.</p>
+          </div>
         ) : (
           <table className="w-full text-sm">
             <tbody>

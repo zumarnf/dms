@@ -162,6 +162,11 @@ export function documentRepository(db: Db) {
         .limit(limit);
     },
 
+    /** Rename a document (e.g. to follow the active version's filename). */
+    async setTitle(id: string, title: string): Promise<void> {
+      await db.update(documents).set({ title, updatedAt: new Date() }).where(eq(documents.id, id));
+    },
+
     async softDelete(id: string): Promise<void> {
       await db.update(documents).set({ deletedAt: new Date() }).where(eq(documents.id, id));
     },

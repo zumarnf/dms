@@ -18,19 +18,24 @@ export default async function TrashPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold">Sampah</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Sampah</h1>
       <p className="text-muted-foreground mt-1 text-sm">
         Dokumen yang dihapus dapat dipulihkan dari sini.
       </p>
 
-      <div className="border-border mt-5 overflow-hidden rounded-xl border">
+      <div className="border-border mt-6 overflow-x-auto rounded-2xl border">
         {docs.length === 0 ? (
           <div className="flex flex-col items-center gap-2 p-12 text-center">
-            <Trash2 className="text-muted-foreground h-8 w-8" />
+            <span className="bg-secondary text-muted-foreground mb-1 grid h-12 w-12 place-items-center rounded-2xl">
+              <Trash2 className="h-6 w-6" />
+            </span>
             <p className="font-medium">Sampah kosong</p>
+            <p className="text-muted-foreground text-sm">
+              Dokumen yang Anda hapus akan muncul di sini.
+            </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-136 text-sm">
             <thead className="bg-secondary/50 text-muted-foreground text-left">
               <tr>
                 <th className="px-4 py-2.5 font-medium">Nama</th>

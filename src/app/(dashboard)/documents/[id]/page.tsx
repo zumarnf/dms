@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Download } from "lucide-react";
+import { Download, FileText, History, Share2, MessageSquare } from "lucide-react";
 import { db } from "@/shared/lib/db";
 import { requireUser } from "@/processes/auth/guard";
 import { authorizeDocument } from "@/processes/auth/authorizeDocument";
@@ -70,56 +70,81 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">{doc.title}</h1>
-          {doc.category && <Badge className="mt-2">{doc.category}</Badge>}
+      {/* Header card */}
+      <div className="bg-card border-border rounded-2xl border p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <span className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+              <FileText className="h-3.5 w-3.5" />
+              Dokumen
+            </span>
+            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight break-words">
+              {doc.title}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {doc.category && <Badge>{doc.category}</Badge>}
+              <span className="text-muted-foreground text-xs">
+                Diperbarui {fmtDate(doc.updatedAt)}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/documents/${id}`}
+              className="bg-primary text-primary-foreground elevate inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium transition-opacity hover:opacity-90"
+            >
+              <Download className="h-4 w-4" />
+              Unduh
+            </a>
+            {canDelete && <DeleteDocumentButton documentId={id} />}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <a
-            href={`/api/documents/${id}`}
-            className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium hover:opacity-90"
-          >
-            <Download className="h-4 w-4" />
-            Unduh
-          </a>
-          {canDelete && <DeleteDocumentButton documentId={id} />}
-        </div>
+
+        {doc.description && (
+          <p className="text-muted-foreground mt-4 text-sm whitespace-pre-wrap">
+            {doc.description}
+          </p>
+        )}
+
+        {canEdit && (
+          <div className="border-border mt-4 border-t pt-4">
+            <MoveDocumentForm
+              documentId={id}
+              folders={folders.map((f) => ({ id: f.id, name: f.name }))}
+              currentFolderId={doc.folderId}
+            />
+          </div>
+        )}
       </div>
 
-      {doc.description && <p className="text-muted-foreground mt-3 text-sm">{doc.description}</p>}
-
-      {canEdit && (
-        <div className="mt-4">
-          <MoveDocumentForm
-            documentId={id}
-            folders={folders.map((f) => ({ id: f.id, name: f.name }))}
-            currentFolderId={doc.folderId}
-          />
-        </div>
-      )}
-
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Versi</h2>
-        <ul className="border-border mt-3 divide-y rounded-xl border">
+      {/* Versi */}
+      <section className="bg-card border-border mt-5 rounded-2xl border p-5 sm:p-6">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
+          <History className="text-primary h-4 w-4" />
+          Versi
+        </h2>
+        <ul className="divide-border mt-3 divide-y">
           {versions.map((v) => {
             const active = v.id === doc.currentVersionId;
             return (
-              <li key={v.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-                <span className="flex items-center gap-2">
-                  <span className="font-mono">v{v.versionNo}</span>
-                  {active && <Badge variant="success">Aktif</Badge>}
-                  <span className="text-muted-foreground">
+              <li key={v.id} className="flex items-center justify-between gap-3 py-3 text-sm">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-muted-foreground font-mono text-xs">v{v.versionNo}</span>
+                    {v.fileName && <span className="truncate font-medium">{v.fileName}</span>}
+                    {active && <Badge variant="success">Aktif</Badge>}
+                  </div>
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     {fmtSize(v.sizeBytes)} · {fmtDate(v.createdAt)}
-                  </span>
-                </span>
+                  </p>
+                </div>
                 {canEdit && !active && (
                   <form action={setCurrentVersionAction}>
                     <input type="hidden" name="documentId" value={id} />
                     <input type="hidden" name="versionId" value={v.id} />
                     <button
                       type="submit"
-                      className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                      className="text-primary shrink-0 text-sm underline-offset-4 hover:underline"
                     >
                       Jadikan aktif
                     </button>
@@ -130,45 +155,52 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
           })}
         </ul>
         {canEdit && (
-          <div className="mt-4">
+          <div className="border-border mt-4 border-t pt-4">
             <AddVersionForm documentId={id} />
           </div>
         )}
       </section>
 
+      {/* Berbagi */}
       {canShare && (
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold">Berbagi</h2>
-          {grants.length > 0 && (
-            <ul className="border-border mt-3 divide-y rounded-xl border">
+        <section className="bg-card border-border mt-5 rounded-2xl border p-5 sm:p-6">
+          <h2 className="flex items-center gap-2 text-base font-semibold">
+            <Share2 className="text-primary h-4 w-4" />
+            Berbagi
+          </h2>
+          {grants.length > 0 ? (
+            <ul className="divide-border mt-3 divide-y">
               {grants.map((g) => (
-                <li
-                  key={g.id}
-                  className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
-                >
-                  <span>
+                <li key={g.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <span className="min-w-0 truncate">
                     {g.label} <Badge variant="outline">{levelLabel[g.level]}</Badge>
                   </span>
                   <RevokeShareButton permissionId={g.id} />
                 </li>
               ))}
             </ul>
+          ) : (
+            <p className="text-muted-foreground mt-2 text-sm">Belum dibagikan ke siapa pun.</p>
           )}
-          <div className="mt-4">
+          <div className="border-border mt-4 border-t pt-4">
             <ShareForm documentId={id} />
           </div>
         </section>
       )}
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Komentar</h2>
-        <ul className="mt-3 flex flex-col gap-3">
+      {/* Komentar */}
+      <section className="bg-card border-border mt-5 rounded-2xl border p-5 sm:p-6">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
+          <MessageSquare className="text-primary h-4 w-4" />
+          Komentar
+        </h2>
+        <ul className="divide-border mt-3 divide-y">
           {comments.length === 0 && (
-            <li className="text-muted-foreground text-sm">Belum ada komentar.</li>
+            <li className="text-muted-foreground py-2 text-sm">Belum ada komentar.</li>
           )}
           {comments.map((c) => (
-            <li key={c.id} className="bg-card border-border rounded-lg border p-3">
-              <div className="flex items-center justify-between">
+            <li key={c.id} className="py-3">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{c.authorName}</span>
                 <span className="text-muted-foreground text-xs">{fmtDate(c.createdAt)}</span>
               </div>
@@ -176,7 +208,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
             </li>
           ))}
         </ul>
-        <div className="mt-4">
+        <div className="border-border mt-4 border-t pt-4">
           <CommentForm documentId={id} />
         </div>
       </section>

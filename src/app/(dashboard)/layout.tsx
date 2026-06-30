@@ -13,8 +13,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex min-h-dvh">
       <AppSidebar role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar userName={user.name} unreadCount={unreadCount} />
-        <main className="flex-1 p-6">{children}</main>
+        <AppTopbar userName={user.name} unreadCount={unreadCount} role={user.role} />
+        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</main>
       </div>
     </div>
   );

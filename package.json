@@ -21,7 +21,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "node --conditions=react-server --import tsx scripts/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -60,6 +61,7 @@
     "prettier": "3.9.1",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "4.3.1",
+    "tsx": "^4.22.4",
     "typescript": "6.0.3",
     "vitest": "4.1.9"
   }

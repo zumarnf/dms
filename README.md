@@ -28,17 +28,17 @@ di folder lokal & email, dan beralih ke satu tempat yang **rapi, aman, dan dapat
 
 ## 🧰 Tech Stack
 
-| Lapis | Teknologi |
-|-------|-----------|
-| Framework | **Next.js 16** (App Router, RSC + Server Actions) |
-| Bahasa | **TypeScript 6**, **React 19** |
-| Database | **PostgreSQL** + **Drizzle ORM** (driver `postgres-js`) |
-| Auth | **Better Auth** (session aman, hashing, rate-limit) |
-| Validasi | **Zod 4** (dipakai ulang di frontend & backend) |
-| Styling | **Tailwind CSS v4** (design token "Forest Ink") |
-| Testing | **Vitest** + Testing Library (+ **PGlite** untuk integration test), **Playwright** (E2E) |
-| Kualitas | **ESLint** + **Prettier** |
-| Storage file | Local filesystem (abstraksi `StorageDriver`, mudah diganti ke S3) |
+| Lapis        | Teknologi                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| Framework    | **Next.js 16** (App Router, RSC + Server Actions)                                        |
+| Bahasa       | **TypeScript 6**, **React 19**                                                           |
+| Database     | **PostgreSQL** + **Drizzle ORM** (driver `postgres-js`)                                  |
+| Auth         | **Better Auth** (session aman, hashing, rate-limit)                                      |
+| Validasi     | **Zod 4** (dipakai ulang di frontend & backend)                                          |
+| Styling      | **Tailwind CSS v4** (design token "Forest Ink")                                          |
+| Testing      | **Vitest** + Testing Library (+ **PGlite** untuk integration test), **Playwright** (E2E) |
+| Kualitas     | **ESLint** + **Prettier**                                                                |
+| Storage file | Local filesystem (abstraksi `StorageDriver`, mudah diganti ke S3)                        |
 
 ---
 
@@ -66,16 +66,20 @@ src/
 ## 🚀 Memulai (Development)
 
 ### Prasyarat
+
 - **Node.js ≥ 20**
 - Sebuah **PostgreSQL** (pilih salah satu di bawah — tidak wajib Docker)
 
 ### 1) Install dependency
+
 ```bash
 npm install
 ```
 
 ### 2) Siapkan environment
+
 Buat file **`.env.local`** di root (di-gitignore) — atau salin dari `.env.example`:
+
 ```env
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DB?sslmode=require
 BETTER_AUTH_SECRET=<string acak min 32 char>   # contoh: openssl rand -base64 32
@@ -86,29 +90,36 @@ STORAGE_DIR=./storage
 ### 3) Sediakan database — pilih satu
 
 **Opsi A — Neon (cloud, gratis, tanpa install) — direkomendasikan**
+
 1. Daftar di [neon.tech](https://neon.tech) → buat project.
-2. **Connect** → matikan **Connection pooling** (pakai koneksi *direct*) → copy connection string.
+2. **Connect** → matikan **Connection pooling** (pakai koneksi _direct_) → copy connection string.
 3. Tempel ke `DATABASE_URL`.
 
 **Opsi B — Docker (lokal)**
 Repo menyertakan `docker-compose.yml` (PostgreSQL + MinIO):
+
 ```bash
 docker compose up -d postgres
 # DATABASE_URL=postgresql://dms:dms@localhost:5432/dms
 ```
 
 ### 4) Terapkan migrasi & jalankan
+
 ```bash
 npm run db:migrate     # buat semua tabel
 npm run dev            # buka http://localhost:3000
 ```
+
 Buka **http://localhost:3000** → daftar akun di `/login`.
 
 ### Membuat admin pertama
+
 Akun baru berperan `contributor`. Untuk membuka menu **Pengguna** & **Aktivitas**, jadikan admin:
+
 ```sql
 UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
 ```
+
 Jalankan lewat **Drizzle Studio** (lihat bawah), **Neon SQL Editor**, atau `psql`.
 
 ---
@@ -118,6 +129,7 @@ Jalankan lewat **Drizzle Studio** (lihat bawah), **Neon SQL Editor**, atau `psql
 ```bash
 npm run db:studio
 ```
+
 Membuka **Drizzle Studio** di `https://local.drizzle.studio` untuk melihat & mengedit tabel
 (`users`, `documents`, `document_versions`, `folders`, `permissions`, `audit_logs`, dll).
 Membutuhkan `DATABASE_URL` di `.env.local`.
@@ -126,17 +138,17 @@ Membutuhkan `DATABASE_URL` di `.env.local`.
 
 ## 📜 Perintah
 
-| Perintah | Fungsi |
-|----------|--------|
-| `npm run dev` | Jalankan dev server |
-| `npm run build` | Build produksi |
-| `npm run typecheck` | Type-check (`tsc --noEmit`) |
-| `npm run lint` / `npm run format` | Lint / format kode |
-| `npm run test` | Unit + integration test (Vitest + PGlite) |
-| `npm run test:e2e` | E2E (Playwright — perlu `npx playwright install`) |
-| `npm run db:migrate` | Terapkan migrasi |
-| `npm run db:generate` | Buat file migrasi dari perubahan schema |
-| `npm run db:studio` | Buka GUI database |
+| Perintah                          | Fungsi                                            |
+| --------------------------------- | ------------------------------------------------- |
+| `npm run dev`                     | Jalankan dev server                               |
+| `npm run build`                   | Build produksi                                    |
+| `npm run typecheck`               | Type-check (`tsc --noEmit`)                       |
+| `npm run lint` / `npm run format` | Lint / format kode                                |
+| `npm run test`                    | Unit + integration test (Vitest + PGlite)         |
+| `npm run test:e2e`                | E2E (Playwright — perlu `npx playwright install`) |
+| `npm run db:migrate`              | Terapkan migrasi                                  |
+| `npm run db:generate`             | Buat file migrasi dari perubahan schema           |
+| `npm run db:studio`               | Buka GUI database                                 |
 
 ---
 

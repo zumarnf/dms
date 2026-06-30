@@ -4,11 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { signIn, signUp } from "@/shared/lib/auth-client";
 import { loginSchema, signupSchema } from "@/features/auth-login/model/schema";
 
 type Mode = "login" | "signup";
 type FormValues = { email: string; password: string; name?: string };
+
+// Resolver must keep `name` (zodResolver drops fields absent from the schema).
+// It is optional here; the required check only applies in signup mode.
+const formSchema = loginSchema.extend({ name: z.string().optional() });
 
 export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const router = useRouter();
@@ -22,7 +27,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     // Email/password are always validated; `name` is checked manually in signup.
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(formSchema),
   });
 
   async function onSubmit(values: FormValues) {
@@ -97,7 +102,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium transition-colors hover:opacity-90 disabled:opacity-60"
+        className="bg-primary text-primary-foreground elevate mt-1 inline-flex h-11 items-center justify-center rounded-xl px-4 font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isSubmitting ? "Memproses…" : mode === "login" ? "Masuk" : "Daftar"}
       </button>

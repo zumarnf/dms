@@ -27,10 +27,12 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       targetId: id,
     });
 
+    // Serve the file under the active version's original name (falls back to title).
+    const downloadName = current.fileName || doc.title;
     return new NextResponse(new Uint8Array(bytes), {
       headers: {
         "Content-Type": current.mimeType,
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(doc.title)}"`,
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(downloadName)}"`,
         "Content-Length": String(current.sizeBytes),
       },
     });

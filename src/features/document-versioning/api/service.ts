@@ -31,15 +31,16 @@ export async function addVersion(
   await deps.storage.put(key, file.bytes);
   const version = await versionRepository(deps.db).createNextVersion(doc.id, {
     storageKey: key,
+    fileName: file.name,
     mimeType: file.mimeType,
     sizeBytes: file.bytes.length,
     uploadedBy: uploaderId,
     extractedText: extracted,
   });
 
-  await documentRepository(deps.db).setSearchText(
-    doc.id,
-    [doc.title, extracted].filter(Boolean).join(" "),
-  );
+  // The new version becomes current → the document title follows its filename.
+  const docs = documentRepository(deps.db);
+  await docs.setTitle(doc.id, file.name);
+  await docs.setSearchText(doc.id, [file.name, extracted].filter(Boolean).join(" "));
   return version;
 }

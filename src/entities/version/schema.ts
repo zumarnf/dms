@@ -21,6 +21,8 @@ export const documentVersions = pgTable(
       .references(() => documents.id, { onDelete: "cascade" }),
     versionNo: integer("version_no").notNull(),
     storageKey: text("storage_key").notNull(),
+    /** Original upload filename for this version (used as the document title + download name). */
+    fileName: text("file_name").notNull().default(""),
     mimeType: text("mime_type").notNull(),
     sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
     checksum: text("checksum"),

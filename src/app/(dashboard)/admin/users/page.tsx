@@ -18,8 +18,8 @@ export default async function AdminUsersPage() {
       <h1 className="text-2xl font-semibold">Pengguna</h1>
       <p className="text-muted-foreground mt-1 text-sm">Kelola peran dan status akun.</p>
 
-      <div className="border-border mt-5 overflow-hidden rounded-xl border">
-        <table className="w-full text-sm">
+      <div className="border-border mt-5 overflow-x-auto rounded-2xl border">
+        <table className="w-full min-w-136 text-sm">
           <thead className="bg-secondary/50 text-muted-foreground text-left">
             <tr>
               <th className="px-4 py-2.5 font-medium">Nama</th>

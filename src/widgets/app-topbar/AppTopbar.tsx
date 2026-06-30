@@ -6,8 +6,18 @@ import { Bell, LogOut } from "lucide-react";
 import { signOut } from "@/shared/lib/auth-client";
 import { Button } from "@/shared/ui/atoms";
 import { ThemeToggle } from "@/shared/ui/theme/ThemeToggle";
+import { MobileNav } from "@/widgets/app-sidebar/MobileNav";
+import type { Role } from "@/shared/config/permissions";
 
-export function AppTopbar({ userName, unreadCount }: { userName: string; unreadCount: number }) {
+export function AppTopbar({
+  userName,
+  unreadCount,
+  role,
+}: {
+  userName: string;
+  unreadCount: number;
+  role: Role;
+}) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -17,7 +27,8 @@ export function AppTopbar({ userName, unreadCount }: { userName: string; unreadC
   }
 
   return (
-    <header className="border-border bg-card/80 sticky top-0 z-10 flex h-14 items-center gap-3 border-b px-4 backdrop-blur">
+    <header className="border-border bg-card/80 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-3 backdrop-blur sm:px-4">
+      <MobileNav role={role} />
       <div className="flex-1" />
       <span className="text-muted-foreground hidden text-sm sm:inline">{userName}</span>
       <Link

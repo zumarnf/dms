@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Inbox } from "lucide-react";
 import { db } from "@/shared/lib/db";
 import { requireUser } from "@/processes/auth/guard";
 import { notificationRepository } from "@/entities/notification/repository";
@@ -37,8 +38,13 @@ export default async function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Notifikasi</h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Notifikasi</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Pembaruan tentang dokumen yang dibagikan kepada Anda.
+          </p>
+        </div>
         {hasUnread && (
           <form action={markAllNotificationsReadAction}>
             <Button type="submit" variant="secondary" size="sm">
@@ -48,16 +54,25 @@ export default async function NotificationsPage() {
         )}
       </div>
 
-      <ul className="mt-5 flex flex-col gap-2">
+      <ul className="mt-6 flex flex-col gap-2.5">
         {items.length === 0 && (
-          <li className="text-muted-foreground text-sm">Tidak ada notifikasi.</li>
+          <li className="border-border flex flex-col items-center gap-2 rounded-2xl border border-dashed p-12 text-center">
+            <span className="bg-secondary text-muted-foreground mb-1 grid h-12 w-12 place-items-center rounded-2xl">
+              <Inbox className="h-6 w-6" />
+            </span>
+            <p className="font-medium">Tidak ada notifikasi</p>
+            <p className="text-muted-foreground text-sm">Notifikasi baru akan muncul di sini.</p>
+          </li>
         )}
         {items.map((n) => {
           const info = describe(n.type, n.payload);
           return (
             <li
               key={n.id}
-              className="bg-card border-border flex items-center justify-between gap-3 rounded-lg border p-3"
+              className={
+                "border-border hover-lift flex items-center justify-between gap-3 rounded-2xl border p-4 " +
+                (n.readAt ? "bg-card" : "bg-primary/4 border-primary/20")
+              }
             >
               <div className="min-w-0">
                 <p className="truncate text-sm">

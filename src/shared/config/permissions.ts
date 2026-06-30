@@ -6,6 +6,19 @@
 export const ROLES = ["admin", "manager", "contributor", "viewer"] as const;
 export type Role = (typeof ROLES)[number];
 
+/** Account status. A disabled account must not be able to use an existing session. */
+export const USER_STATUSES = ["active", "disabled"] as const;
+export type UserStatus = (typeof USER_STATUSES)[number];
+
+/**
+ * Whether an account may use the app. Deny-by-default for any known non-active
+ * status (e.g. "disabled"); a missing/undefined value is treated as active so
+ * sessions issued before the field existed are not locked out.
+ */
+export function isActiveStatus(status: string | null | undefined): boolean {
+  return status == null || status === "active";
+}
+
 export type Action =
   | "document:create"
   | "document:read"

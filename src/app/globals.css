@@ -151,14 +151,151 @@
     border: 1px solid var(--color-input);
     background-color: var(--color-background);
     color: var(--color-foreground);
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.875rem;
     font-size: 0.875rem;
-    transition: border-color 150ms ease;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
   }
   .input:focus-visible {
     border-color: var(--color-ring);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ring) 18%, transparent);
   }
   .input[aria-invalid="true"] {
     border-color: var(--color-destructive);
+  }
+
+  /*
+   * Premium "Forest Ink Elevated" surfaces — glass + soft depth.
+   * Used by the landing, login, and dashboard cards. Tokens only, so they
+   * follow light/dark automatically.
+   */
+  .glass {
+    background-color: color-mix(in srgb, var(--color-card) 72%, transparent);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  }
+  .elevate {
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-foreground) 8%, transparent),
+      0 12px 32px -16px color-mix(in srgb, var(--color-foreground) 18%, transparent);
+  }
+  /* Subtle hover lift for interactive cards. */
+  .hover-lift {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 2px 4px color-mix(in srgb, var(--color-foreground) 8%, transparent),
+      0 22px 48px -20px color-mix(in srgb, var(--color-primary) 40%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  }
+  /* Emerald → champagne accent text for short decorative keywords. */
+  .text-gradient {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-primary),
+      color-mix(in srgb, var(--color-primary) 55%, var(--color-accent))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* ── Decorative backgrounds + motion (Premium Calm Tool) ──────────────────── */
+@layer utilities {
+  /* Faint grid for hero backdrops. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 75% 60% at 50% 0%, #000 35%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 0%, #000 35%, transparent 75%);
+  }
+  /* Soft emerald/gold glow blobs. */
+  .blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(64px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Entry animations (one-shot). */
+  .animate-fade-up {
+    animation: dms-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fade-in {
+    animation: dms-fade-in 0.8s ease both;
+  }
+  .animate-float {
+    animation: dms-float 9s ease-in-out infinite;
+  }
+
+  /* Scroll-reveal: hidden until the Reveal client component marks it visible. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dms-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dms-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dms-float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-22px) translateX(10px);
+  }
+}
+
+/*
+ * Reduced motion: neutralize entry/looping motion and reveal so content is
+ * always visible without movement (a11y baseline, frontend.md).
+ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-float {
+    animation: none !important;
   }
 }

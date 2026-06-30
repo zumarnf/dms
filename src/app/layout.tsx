@@ -28,7 +28,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       suppressHydrationWarning
       className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="bg-background text-foreground min-h-dvh antialiased">
+      <body
+        suppressHydrationWarning
+        className="bg-background text-foreground min-h-dvh antialiased"
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

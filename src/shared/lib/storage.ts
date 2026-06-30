@@ -5,7 +5,8 @@ import { ValidationError } from "@/shared/lib/errors";
  * The S3-compatible client + presigned URL generation is added with the upload
  * feature (Phase 5), but validation lives here so it is shared and unit-tested.
  */
-export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
+export const MAX_FILE_SIZE_MB = 50;
+export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 50 MB
 
 export const ALLOWED_MIME_TYPES: Readonly<Record<string, string>> = {
   "application/pdf": "pdf",
@@ -21,6 +22,21 @@ export const ALLOWED_MIME_TYPES: Readonly<Record<string, string>> = {
   "text/plain": "txt",
   "text/csv": "csv",
 };
+
+/** Distinct file extensions accepted (for display + the file picker filter). */
+export const ALLOWED_EXTENSIONS: readonly string[] = [
+  ...new Set(Object.values(ALLOWED_MIME_TYPES)),
+];
+
+/** `accept` attribute for <input type="file"> — both MIME types and extensions. */
+export const UPLOAD_ACCEPT = [
+  ...Object.keys(ALLOWED_MIME_TYPES),
+  ...ALLOWED_EXTENSIONS.map((e) => `.${e}`),
+].join(",");
+
+/** Human-readable summary of the upload rules, shown next to the file picker. */
+export const ALLOWED_TYPES_LABEL =
+  "PDF, Word, Excel, PowerPoint, gambar (PNG/JPG/WebP), dan teks (TXT/CSV)";
 
 export type UploadCandidate = { name: string; mimeType: string; size: number };
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileText, Search } from "lucide-react";
+import { Download, FileText, Search, UploadCloud } from "lucide-react";
 import { requireUser } from "@/processes/auth/guard";
 import { db } from "@/shared/lib/db";
 import { documentRepository } from "@/entities/document/repository";
@@ -26,24 +26,45 @@ export default async function DocumentsPage({
 
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Dokumen</h1>
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">Dokumen</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Kelola, cari, dan unggah dokumen Anda dengan aman.
+        </p>
+      </header>
+
+      {/* Upload card — rules are always visible inside the form. */}
+      <section
+        className="bg-card border-border mt-5 rounded-2xl border p-5"
+        aria-label="Unggah dokumen"
+      >
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <UploadCloud className="text-primary h-4 w-4" />
+          Unggah Dokumen
+        </h2>
         <UploadForm />
+      </section>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <form className="relative w-full max-w-sm" role="search">
+          <Search className="text-muted-foreground pointer-events-none absolute top-2.5 left-3 h-4 w-4" />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Cari dokumen…"
+            aria-label="Cari dokumen"
+            className="input pl-9"
+          />
+        </form>
+        <p className="text-muted-foreground text-sm" aria-live="polite">
+          {q
+            ? `${docs.length} hasil untuk “${q}”`
+            : `${docs.length} dokumen${docs.length === 20 ? "+" : ""}`}
+        </p>
       </div>
 
-      <form className="relative mt-5 max-w-sm" role="search">
-        <Search className="text-muted-foreground pointer-events-none absolute top-2.5 left-3 h-4 w-4" />
-        <input
-          type="search"
-          name="q"
-          defaultValue={q}
-          placeholder="Cari dokumen…"
-          aria-label="Cari dokumen"
-          className="input pl-9"
-        />
-      </form>
-
-      <div className="border-border mt-5 overflow-hidden rounded-xl border">
+      <div className="border-border mt-4 overflow-x-auto rounded-2xl border">
         {docs.length === 0 ? (
           <div className="flex flex-col items-center gap-2 p-12 text-center">
             <FileText className="text-muted-foreground h-8 w-8" />
@@ -53,7 +74,7 @@ export default async function DocumentsPage({
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-136 text-sm">
             <thead className="bg-secondary/50 text-muted-foreground text-left">
               <tr>
                 <th className="px-4 py-2.5 font-medium">Nama</th>
